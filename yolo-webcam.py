@@ -2,6 +2,7 @@ from ultralytics import YOLO
 import cv2
 import cvzone
 import math
+import time
 
 cap = cv2.VideoCapture(0)
 cap.set(3, 720)
@@ -21,9 +22,13 @@ classNames = ["person", "bicycle", "car", "motorbike", "aeroplane", "bus", "trai
               "teddy bear", "hair drier", "toothbrush"
               ]
 
+prev_frame_time = 0
+new_frame_time = 0
+
 while True:
+  new_frame_time = time.time()
   success, img = cap.read()
-  results = model(img)
+  results = model(img, stream=True)
 
   for result in results:
     boxes = result.boxes
@@ -46,5 +51,10 @@ while True:
 
       # menabahkan text ke dalam rect
       cvzone.putTextRect(img, f'{classNames[cls]} {conf}', (max(0, x1), max(35, y1)), scale=1, thickness=1)
+    
+    fps = 1 / (new_frame_time - prev_frame_time)
+    prev_frame_time = new_frame_time
+    print(fps)
+    
   cv2.imshow("Image", img)
   cv2.waitKey(1)
