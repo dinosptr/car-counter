@@ -1,6 +1,7 @@
 from ultralytics import YOLO
 import cv2
 import cvzone
+import math
 
 cap = cv2.VideoCapture(0)
 cap.set(3, 720)
@@ -25,5 +26,9 @@ while True:
       # Cara kedua menggunakan cvzone
       w, h = x2-x1, y2-y1
       cvzone.cornerRect(img, (x1, y1, w, h))
+
+      # menambahkan confidence pada bbox
+      conf = math.ceil((box.conf[0] * 100)) / 100
+      cvzone.putTextRect(img, f'{conf}', (max(0, x1), max(35, y1)))
   cv2.imshow("Image", img)
   cv2.waitKey(1)
