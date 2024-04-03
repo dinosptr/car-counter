@@ -4,9 +4,14 @@ import cvzone
 import math
 import time
 
-cap = cv2.VideoCapture(0)
-cap.set(3, 720)
-cap.set(4, 720)
+# cap = cv2.VideoCapture(0)
+# cap.set(3, 720)
+# cap.set(4, 720)
+
+cap = cv2.VideoCapture('Videos/cars.mp4')
+# Set the frame width and height
+# cap.set(cv2.CAP_PROP_FRAME_WIDTH, 480)
+# cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 950)
 
 model = YOLO("model/yolov8n.pt")
 
@@ -25,10 +30,15 @@ classNames = ["person", "bicycle", "car", "motorbike", "aeroplane", "bus", "trai
 prev_frame_time = 0
 new_frame_time = 0
 
+mask = cv2.imread('mask.png')
+print(mask.shape)
 while True:
   new_frame_time = time.time()
   success, img = cap.read()
-  results = model(img, stream=True)
+  img = cv2.resize(img, (950, 480))
+  print(img.shape)
+  imgRegion = cv2.bitwise_and(img, mask)
+  results = model(imgRegion, stream=True)
 
   for result in results:
     boxes = result.boxes
@@ -41,20 +51,22 @@ while True:
 
       # Cara kedua menggunakan cvzone
       w, h = x2-x1, y2-y1
-      cvzone.cornerRect(img, (x1, y1, w, h))
+      cvzone.cornerRect(img, (x1, y1, w, h), l=15)
 
       # menambahkan confidence pada bbox
-      conf = math.ceil((box.conf[0] * 100)) / 100
+      conf = math.ceil((box.conf[0] * 100)) / 100 
 
       # menambahkan classname
       cls = int(box.cls[0])
 
       # menabahkan text ke dalam rect
-      cvzone.putTextRect(img, f'{classNames[cls]} {conf}', (max(0, x1), max(35, y1)), scale=1, thickness=1)
+      cvzone.putTextRect(img, f'{classNames[cls]} {conf}', (max(0, x1), max(35, y1)),
+                          scale=0.6, thickness=1, offset=3)
     
     fps = 1 / (new_frame_time - prev_frame_time)
     prev_frame_time = new_frame_time
     print(fps)
     
   cv2.imshow("Image", img)
-  cv2.waitKey(1)
+  cv2.imshow("Image Region", imgRegion)
+  cv2.waitKey(0)
