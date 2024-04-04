@@ -32,14 +32,12 @@ classNames = ["person", "bicycle", "car", "motorbike", "aeroplane", "bus", "trai
 
 # Tracking
 tracker = Sort(max_age=20, min_hits=3, iou_threshold=0.3)
-limits = [280, 200, 478, 200]
 
-prev_frame_time = 0
-new_frame_time = 0
+
+limits = [290, 200, 478, 200]
+totalCount = []
 
 mask = cv2.imread('mask.png')
-print(mask.shape)
-
 
 while True:
   new_frame_time = time.time()
@@ -82,10 +80,7 @@ while True:
       # # menabahkan text ke dalam rect
       # cvzone.putTextRect(img, f'{classNames[cls]} {conf}', (max(0, x1), max(35, y1)),
       #                     scale=0.6, thickness=1, offset=3)
-    
-    # fps = 1 / (new_frame_time - prev_frame_time)
-    # prev_frame_time = new_frame_time
-    # print(fps)
+
   resultsTracker = tracker.update(detections)
   cv2.line(img, (limits[0], limits[1]), (limits[2], limits[3]), (0,0,255), 5)
   for result in resultsTracker:
@@ -93,10 +88,17 @@ while True:
       x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
       w, h = x2 - x1, y2 - y1
       print(result)
-      cvzone.cornerRect(img, (x1, y1, w, h), l=9, rt=2, colorR=(255,0,0))
-      cvzone.putTextRect(img, f'{int(id)}', (max(0, x1), max(35, y1)),
-                                   scale=2, thickness=3, offset=10)
-    
+      cvzone.cornerRect(img, (x1, y1, w, h), l=9, rt=2, colorR=(255,0,255))
+      # cvzone.putTextRect(img, f'{int(id)}', (max(0, x1), max(35, y1)),
+      #                              scale=2, thickness=3, offset=10)
+      cx, cy = x1 + w // 2, y1 + h // 2
+      cv2.circle(img, (cx, cy), 5, (255, 0, 255), cv2.FILLED)
+
+      if limits[0] < cx < limits[2] and limits[1] - 15 < cy < limits[1] + 15:
+          if totalCount.count(id) == 0:
+              totalCount.append(id)
+              cv2.line(img, (limits[0], limits[1]), (limits[2], limits[3]), (0, 255, 0), 5)
+  cvzone.putTextRect(img, f' Count: {len(totalCount)}', (50, 50), colorR=(0, 100, 0)) 
   cv2.imshow("Image", img)
   # cv2.imshow("Image Region", imgRegion)
-  cv2.waitKey(0)
+  cv2.waitKey(1)
