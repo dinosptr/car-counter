@@ -7,14 +7,7 @@ from sort import *
 import numpy as np
 
 
-# cap = cv2.VideoCapture(0)
-# cap.set(3, 720)
-# cap.set(4, 720)
 
-cap = cv2.VideoCapture('Videos/cars.mp4')
-# Set the frame width and height
-# cap.set(cv2.CAP_PROP_FRAME_WIDTH, 480)
-# cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 950)
 
 model = YOLO("model/yolov8n.pt")
 
@@ -34,16 +27,41 @@ classNames = ["person", "bicycle", "car", "motorbike", "aeroplane", "bus", "trai
 tracker = Sort(max_age=20, min_hits=3, iou_threshold=0.3)
 
 
+# config
+cap = cv2.VideoCapture('Videos/cars.mp4')
 limits = [290, 200, 478, 200]
 totalCount = []
-
+WIDTH = 950
+HEIGHT = 480
 mask = cv2.imread('mask.png')
+
+# cap = cv2.VideoCapture('Videos/video_2.mp4')
+# WIDTH = 563
+# HEIGHT = 499
+# limits = [315, 200, 478, 200]
+# totalCount = []
+# mask = cv2.imread('mask_2.png')
+
+# webcam
+# cap = cv2.VideoCapture(0)
+# cap.set(3, 720)
+# cap.set(4, 720)
+
+# Config write video 
+output_video_path = 'output_video.mp4'
+fps = int(cap.get(cv2.CAP_PROP_FPS))
+frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+fourcc = cv2.VideoWriter_fourcc(*'XVID')
+out = cv2.VideoWriter(output_video_path, fourcc, fps, (frame_width, frame_height))
 
 while True:
   new_frame_time = time.time()
   success, img = cap.read()
+  if not success:
+        break
 
-  img = cv2.resize(img, (950, 480))
+  img = cv2.resize(img, (WIDTH, HEIGHT))
 
   imgRegion = cv2.bitwise_and(img, mask)
   results = model(imgRegion, stream=True)
@@ -99,6 +117,10 @@ while True:
               totalCount.append(id)
               cv2.line(img, (limits[0], limits[1]), (limits[2], limits[3]), (0, 255, 0), 5)
   cvzone.putTextRect(img, f' Count: {len(totalCount)}', (50, 50), colorR=(0, 100, 0)) 
+
+  # Write frame to output video
+  out.write(img)
+  
   cv2.imshow("Image", img)
   # cv2.imshow("Image Region", imgRegion)
   cv2.waitKey(1)
