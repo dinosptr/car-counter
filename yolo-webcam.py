@@ -9,7 +9,7 @@ import numpy as np
 
 
 
-model = YOLO("model/yolov8n.pt")
+model = YOLO("model/yolov8l.pt")
 
 classNames = ["person", "bicycle", "car", "motorbike", "aeroplane", "bus", "train", "truck", "boat",
               "traffic light", "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat",
@@ -35,10 +35,10 @@ tracker = Sort(max_age=20, min_hits=3, iou_threshold=0.3)
 # HEIGHT = 480
 # mask = cv2.imread('mask.png')
 
-cap = cv2.VideoCapture('Videos/cars_2.mp4')
+cap = cv2.VideoCapture('Videos/cars_22.mp4')
 WIDTH = 563
 HEIGHT = 499
-limits_in = [320, 200, 480, 200]
+limits_in = [320, 200, 530, 200]
 limits_out = [90, 200, 280, 200]
 totalCount_in = []
 totalCount_out = []
@@ -64,7 +64,7 @@ while True:
   img = cv2.resize(img, (WIDTH, HEIGHT))
 
   imgRegion = cv2.bitwise_and(img, mask)
-  results = model(imgRegion, stream=True)
+  results = model(imgRegion, stream=True, iou=0.5)
 
   detections = np.empty((0, 5))
 
@@ -100,31 +100,29 @@ while True:
       #                     scale=0.6, thickness=1, offset=3)
 
   resultsTracker = tracker.update(detections)
-  cv2.line(img, (limits_in[0], limits_in[1]), (limits_in[2], limits_in[3]), (0,0,255), 5)
-  cv2.line(img, (limits_out[0], limits_out[1]), (limits_out[2], limits_out[3]), (0,0,255), 5)
+  cv2.line(img, (limits_in[0], limits_in[1]), (limits_in[2], limits_in[3]), (0,0,255), 3)
+  cv2.line(img, (limits_out[0], limits_out[1]), (limits_out[2], limits_out[3]), (0,0,255), 3)
   for result in resultsTracker:
       x1, y1, x2, y2, id = result
       x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
       w, h = x2 - x1, y2 - y1
       print(result)
-      if currentClass == "car" or currentClass == "truck" or currentClass == "bus" \
-                    or currentClass == "motorbike" and conf > 0.3:
-        cvzone.cornerRect(img, (x1, y1, w, h), l=9, rt=2, colorR=(255,0,255))
-        # cvzone.putTextRect(img, f'{int(id)}', (max(0, x1), max(35, y1)),
-        #                              scale=2, thickness=3, offset=10)
+      cvzone.cornerRect(img, (x1, y1, w, h), l=9, rt=2, colorR=(255,0,255))
+      # cvzone.putTextRect(img, f'{int(id)}', (max(0, x1), max(35, y1)),
+      #                              scale=2, thickness=3, offset=10)
       cx, cy = x1 + w // 2, y1 + h // 2
       cv2.circle(img, (cx, cy), 5, (255, 0, 255), cv2.FILLED)
 
-      if limits_in[0] < cx < limits_in[2] and limits_in[1] - 15 < cy < limits_in[1] + 15:
+      if limits_in[0] < cx < limits_in[2] and limits_in[1] - 10 < cy < limits_in[1] + 10:
           if totalCount_in.count(id) == 0:
               totalCount_in.append(id)
               cv2.line(img, (limits_in[0], limits_in[1]), (limits_in[2], limits_in[3]), (0, 255, 0), 5)
-      elif limits_out[0] < cx < limits_out[2] and limits_out[1] - 15 < cy < limits_out[1] + 15:
+      if limits_out[0] < cx < limits_out[2] and limits_out[1] - 10 < cy < limits_out[1] + 10:
           if totalCount_out.count(id) == 0:
               totalCount_out.append(id)
               cv2.line(img, (limits_out[0], limits_out[1]), (limits_out[2], limits_out[3]), (0, 255, 0), 5)
   cvzone.putTextRect(img, f' Count out: {len(totalCount_out)}', (30, 50), colorR=(0, 100, 0), scale=2, thickness=2, offset=5) 
-  cvzone.putTextRect(img, f' Count in: {len(totalCount_in)}', (350, 50), colorR=(0, 100, 0), scale=2, thickness=2, offset=5) 
+  cvzone.putTextRect(img, f' Count in: {len(totalCount_in)}', (300, 50), colorR=(0, 100, 0), scale=2, thickness=2, offset=5) 
 
   # Write frame to output video
   out.write(img)
