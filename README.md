@@ -50,8 +50,6 @@ Once Car Counter is up and running, follow these steps to start counting cars:
 4. Analyze the collected data to gain insights into traffic behavior and trends.
 
 ## Future Enhancements
-
-- **Multi-Object Detection**: Extend Car Counter to detect and count other types of vehicles, such as buses, trucks, and motorcycles.
 - **Speed Estimation**: Integrate speed estimation algorithms to measure the velocity of moving vehicles and analyze traffic speed patterns.
 - **Integration with GIS**: Integrate with Geographic Information Systems (GIS) to visualize traffic data on maps and perform spatial analysis.
 
