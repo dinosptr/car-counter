@@ -39,7 +39,7 @@ limits_in = [320, 200, 530, 200]
 limits_out = [90, 200, 280, 200]
 totalCount_in = []
 totalCount_out = []
-mask = cv2.imread('mask_22.png')
+mask = cv2.imread('mask_3.png')
 
 # webcam
 # cap = cv2.VideoCapture(0)
